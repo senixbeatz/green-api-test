@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GREEN-API</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      background: #f0f0f0;
+    }
+
+    .browser-chrome {
+      background: #e8e8e8;
+      border-bottom: 1px solid #ccc;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .browser-dots {
+      display: flex;
+      gap: 5px;
+    }
+
+    .browser-dots span {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .dot-red    { background: #ff5f57; }
+    .dot-yellow { background: #febc2e; }
+    .dot-green  { background: #28c840; }
+
+    .browser-tab {
+      background: #fff;
+      border-radius: 6px 6px 0 0;
+      padding: 5px 16px;
+      font-size: 12px;
+      color: #333;
+      border: 1px solid #ccc;
+      border-bottom: none;
+    }
+
+    .browser-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: #e8e8e8;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: #555;
+      padding: 2px 6px;
+    }
+
+    .address-bar {
+      flex: 1;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-size: 13px;
+      color: #333;
+      outline: none;
+    }
+
+    .page {
+      max-width: 860px;
+      margin: 30px auto;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 30px;
+      display: flex;
+      gap: 30px;
+    }
+
+    .left {
+      flex: 0 0 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .right > label {
+      font-style: italic;
+      font-size: 15px;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      border: 1px solid #bbb;
+      border-radius: 3px;
+      padding: 6px 8px;
+      font-size: 13px;
+      font-family: Arial, sans-serif;
+      outline: none;
+      background: #fff;
+      color: #333;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      border-color: #888;
+    }
+
+    #response {
+      flex: 1;
+      resize: none;
+      min-height: 420px;
+      font-family: monospace;
+      font-size: 13px;
+      background: #fafafa;
+      color: #222;
+      line-height: 1.6;
+    }
+
+    .section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #ddd;
+      margin: 2px 0;
+    }
+
+    button {
+      background: #f5f5f5;
+      border: 1px solid #bbb;
+      border-radius: 3px;
+      padding: 7px 0;
+      width: 100%;
+      font-size: 13px;
+      cursor: pointer;
+      color: #333;
+    }
+
+    button:hover  { background: #e8e8e8; }
+    button:active { background: #ddd; }
+  </style>
+</head>
+<body>
+
+<div class="browser-chrome">
+  <div class="browser-dots">
+    <span class="dot-red"></span>
+    <span class="dot-yellow"></span>
+    <span class="dot-green"></span>
+  </div>
+  <div class="browser-tab">GREEN-API</div>
+</div>
+
+<div class="browser-nav">
+  <button class="nav-btn">&#8592;</button>
+  <button class="nav-btn">&#8594;</button>
+  <button class="nav-btn">&#8635;</button>
+  <input class="address-bar" type="text" value="https://your-username.github.io/green-api/" readonly />
+</div>
+
+<div class="page">
+  <div class="left">
+
+    <div class="section">
+      <input type="text" id="idInstance" placeholder="idInstance" />
+      <input type="text" id="apiToken" placeholder="ApiTokenInstance" />
+    </div>
+
+    <hr class="divider" />
+
+    <div class="section">
+      <button onclick="doGetSettings()">getSettings</button>
+      <button onclick="doGetStateInstance()">getStateInstance</button>
+    </div>
+
+    <hr class="divider" />
+
+    <div class="section">
+      <input type="text" id="sm-phone" placeholder="7777234567" />
+      <textarea id="sm-text" rows="3" placeholder="Hello World!"></textarea>
+      <button onclick="doSendMessage()">sendMessage</button>
+    </div>
+
+    <hr class="divider" />
+
+    <div class="section">
+      <input type="text" id="sf-phone" placeholder="7777234567" />
+      <input type="text" id="sf-url" placeholder="https://my.site.com/img/horse.png" />
+      <input type="text" id="sf-name" placeholder="horse.png" />
+      <button onclick="doSendFileByUrl()">sendFileByUrl</button>
+    </div>
+
+  </div>
+
+  <div class="right">
+    <label>Ответ:</label>
+    <textarea id="response" readonly></textarea>
+  </div>
+</div>
+
+<script>
+  function getCredentials() {
+    return {
+      id: document.getElementById('idInstance').value.trim(),
+      token: document.getElementById('apiToken').value.trim()
+    };
+  }
+
+  function setResponse(text) {
+    document.getElementById('response').value = text;
+  }
+
+  function checkCredentials() {
+    var c = getCredentials();
+    if (!c.id || !c.token) {
+      setResponse('Ошибка: заполните idInstance и ApiTokenInstance.');
+      return false;
+    }
+    return true;
+  }
+
+  function apiBase() {
+    return 'https://api.green-api.com/waInstance' + getCredentials().id;
+  }
+
+  async function doGetSettings() {
+    if (!checkCredentials()) return;
+    var c = getCredentials();
+    setResponse('Выполняется запрос...');
+    try {
+      var res = await fetch(apiBase() + '/getSettings/' + c.token);
+      var data = await res.json();
+      setResponse(JSON.stringify(data, null, 2));
+    } catch (e) {
+      setResponse('Ошибка: ' + e.message);
+    }
+  }
+
+  async function doGetStateInstance() {
+    if (!checkCredentials()) return;
+    var c = getCredentials();
+    setResponse('Выполняется запрос...');
+    try {
+      var res = await fetch(apiBase() + '/getStateInstance/' + c.token);
+      var data = await res.json();
+      setResponse(JSON.stringify(data, null, 2));
+    } catch (e) {
+      setResponse('Ошибка: ' + e.message);
+    }
+  }
+
+  async function doSendMessage() {
+    if (!checkCredentials()) return;
+    var c = getCredentials();
+    var phone = document.getElementById('sm-phone').value.trim();
+    var message = document.getElementById('sm-text').value.trim();
+    if (!phone || !message) {
+      setResponse('Ошибка: заполните номер телефона и текст сообщения.');
+      return;
+    }
+    var chatId = phone.includes('@') ? phone : phone + '@c.us';
+    setResponse('Выполняется запрос...');
+    try {
+      var res = await fetch(apiBase() + '/sendMessage/' + c.token, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chatId: chatId, message: message })
+      });
+      var data = await res.json();
+      setResponse(JSON.stringify(data, null, 2));
+    } catch (e) {
+      setResponse('Ошибка: ' + e.message);
+    }
+  }
+
+  async function doSendFileByUrl() {
+    if (!checkCredentials()) return;
+    var c = getCredentials();
+    var phone = document.getElementById('sf-phone').value.trim();
+    var url = document.getElementById('sf-url').value.trim();
+    var name = document.getElementById('sf-name').value.trim();
+    if (!phone || !url) {
+      setResponse('Ошибка: заполните номер телефона и ссылку на файл.');
+      return;
+    }
+    var chatId = phone.includes('@') ? phone : phone + '@c.us';
+    if (!name) {
+      name = url.split('/').pop() || 'file';
+    }
+    setResponse('Выполняется запрос...');
+    try {
+      var res = await fetch(apiBase() + '/sendFileByUrl/' + c.token, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chatId: chatId, urlFile: url, fileName: name })
+      });
+      var data = await res.json();
+      setResponse(JSON.stringify(data, null, 2));
+    } catch (e) {
+      setResponse('Ошибка: ' + e.message);
+    }
+  }
+</script>
+
+</body>
+</html>
